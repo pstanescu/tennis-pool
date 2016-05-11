@@ -1,0 +1,13 @@
+<template name="tournamentList">
+  <div class="container top-margin">
+    <div class="row">
+      {{#each tournaments}}
+      <div class="col-md-3 col-xs-6">
+        <div class="light-border">
+          <a href="/tournaments/{{_id}}">{{tournamentName}} {{year}}</a>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</template>

@@ -1,0 +1,131 @@
+<template name="tournamentItem">
+  <div class="container top-margin">
+    <div class="row">
+      <div class="col-md-12">
+        {{> tournamentMeta}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        {{> drawMeta}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        {{> drawRounds}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-3 col-xs-6">
+        {{> insertDrawForm}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        {{> voters}}
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="tournamentMeta">
+  {{#with tournaments}}
+  <span class="h1">
+    {{> editableText collection="tournaments" field="tournamentName"}}
+    {{> editableText collection="tournaments" field="year"}}
+  </span>
+  {{/with}}
+</template>
+
+<template name="drawMeta">
+  <div class="col-md-3 col-xs-6">
+  <h3>Men</h3>
+    <ul class="nav nav-pills">
+      {{#each m_draws}}
+        <li role="presentation" class="active"><a href="#" id="js-m_draw">{{drawType}}</a></li>
+      {{/each}}    
+    </ul>
+  </div>
+  <div class="col-md-3 col-xs-6">
+  <h3>Women</h3>
+    <ul class="nav nav-pills">    
+      {{#each w_draws}}
+        <li role="presentation" class="active"><a href="#" id="js-w_draw">{{drawType}}</a></li>
+      {{/each}}    
+    </ul>
+  </div>
+</template>
+
+<template name="drawRounds">
+  <div class="col-md-3 col-xs-6">
+  <h3>Men</h3>
+    <ul class="nav nav-pills">
+      {{#each m_draws}}
+        <li role="presentation" class="active"><a href="#" id="js-mDraw">{{drawType}}</a></li>
+      {{/each}}    
+    </ul>
+  </div>
+  <div class="col-md-3 col-xs-6">
+  <h3>Women</h3>
+    <ul class="nav nav-pills">    
+      {{#each w_draws}}
+        <li role="presentation" class="active"><a href="#" id="js-wDraw">{{drawType}}</a></li>
+      {{/each}}    
+    </ul>
+  </div>
+</template>
+
+
+
+
+<template name="commentList">
+  {{#each comments}}
+  <ul>
+    <li>{{title}}
+      <p>{{body}}</p>
+    </li>
+  </ul>
+  {{/each}}
+</template>
+
+<!--<template name="insertCommentForm2">
+  {{> quickForm collection="Comments" id="insertCommentForm" type="method" meteormethod="addComment"}}
+</template>-->
+
+
+<template name="insertDrawForm">
+  {{#if canEdit}}
+    {{#autoForm collection="Draws" id="insertDrawForm" type="method" meteormethod="addDraw"}}
+    <fieldset>
+      <legend>Add New Draw</legend>
+      {{> afQuickField name='drawType'}}
+      {{> afQuickField name='drawGender'}}
+      {{> afQuickField name='drawSize'}}
+      {{> afQuickField name='tid' value=tid type="hidden"}}
+    </fieldset>
+    <button type="submit" class="btn btn-primary">Insert</button>
+    {{/autoForm}}
+  {{/if}}
+</template>
+
+
+<template name="insertCommentForm">
+  {{#autoForm collection="Comments" id="insertCommentForm" type="method" meteormethod="addComment"}}
+  <fieldset>
+    <legend>Comment</legend>
+    {{> afQuickField name='title'}}
+    {{> afQuickField name='body' rows=6 placehold="Write your comment here"}}
+    {{> afQuickField name='mid' value=mid type="hidden"}}
+  </fieldset>
+  <button type="submit" class="btn btn-primary">Insert</button>
+  {{/autoForm}}
+</template>
+
+
+
+<template name="voters">
+  Voters:
+  {{#each users}}
+  <span class="label label-success">{{firstname}}</span>
+  {{/each}}
+</template>

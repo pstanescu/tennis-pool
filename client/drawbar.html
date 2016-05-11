@@ -1,0 +1,15 @@
+<template name="drawbar">
+  <nav class="navbar navbar-default">
+      <div class="container">
+        <ul class="nav navbar-nav">
+          <li>
+            <a href="#" class="js-add-doc">
+              {{#each draws}}
+              <li><a href="/tournaments/{{_id}}">{{drawName}}</a></li>
+              {{/each}}
+            </a>
+          </li>
+        </ul>
+      </div>
+  </nav> <!--end nav container-->
+</template>

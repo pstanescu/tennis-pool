@@ -1,0 +1,29 @@
+
+<template name="navbar">
+  <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="/">TennisPool</a>
+        <ul class="nav navbar-nav">
+          <li>
+            <a href="#" class="js-add-tournament">
+              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+              New Tournament
+            </a>
+          </li>
+          <!-- drop down list-->
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tournaments <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              {{#each tournaments}}
+              <li><a href="/tournaments/{{_id}}">{{tournamentName}}</a></li>
+              {{/each}}
+            </ul>
+          </li>
+          <!-- drop down list-->
+        </ul>
+        <p class="navbar-text navbar-right">{{> loginButtons align="right"}}</p>
+      </div>
+  </nav> <!--end nav container-->
+</template>
+
+
