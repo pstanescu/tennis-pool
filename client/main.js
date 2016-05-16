@@ -12,22 +12,6 @@ Meteor.subscribe("comments");
 Meteor.subscribe("voters");
 Meteor.subscribe("players");
 
-Router.configure({
-  layoutTemplate: 'ApplicationLayout'
-});
-
-Router.route('/',function(){
-  this.render("navbar",{to:"header"});
-  this.render("tournamentList",{to:"main"});
-})
-
-Router.route('/tournaments/:_id',function(){
-  Session.set("tid",this.params._id)
-  this.render("navbar",{to:"header"});
-  this.render("tournamentItem",{to:"main"});
-})
-
-
 Template.tournamentList.helpers({
   tid:function() {
     setupCurrentTournament();
@@ -41,6 +25,13 @@ Template.tournamentList.helpers({
 Template.navbar.helpers({
   tournaments:function(){
     return Tournaments.find();
+  },
+  getAdmin:function(){
+    console.log("navbar template - getAdmin");
+    if(Meteor.user().emails[0].address == "pstanescu@gmail.com"){
+      return true;
+    }
+    return false;
   }
 })
 
@@ -54,35 +45,53 @@ Template.insertDrawForm.helpers({
   },
   canEdit:function(){
     console.log("insertDrawForm - canEdit")
+    console.log(Session.get("tid"));
     var tourney = Tournaments.findOne({_id:Session.get("tid")});
-    console.log(tourney.owner==Meteor.userId())
-    console.log(tourney.owner)
-    console.log(Meteor.userId())
-
+    console.log("insertDrawForm canEdit tourney "+tourney);
     if(tourney){
-      if(tourney.owner == Meteor.userId()){
-        return true;
-      }
+      return true;
+    }
+    return false;
+  }
+})
+
+Template.insertMatchesForm.helpers({
+  roundid:function(){
+    console.log("drawid: "+Session.get("drawid"));
+    var id = Rounds.findOne({drawid:Session.get("drawid"),roundOrder:1});
+    console.log("roundid "+id);
+    return id._id;
+  },
+  addMatch:function(match){
+    console.log("addMatch");
+    if(!Session.get("drawid")){
+      alert('Draw was not selected!');
+      return;
+    }
+    return Meteor.call("addMatch",match);
+  },
+  canEdit:function(){
+    console.log("insertMatchForm - canEdit")
+    console.log(Session.get("drawid"));
+    var round = Rounds.find({drawid:Session.get("drawid"),roundOrder:1},{limit: 1}).fetch();
+    console.log("round id: "+round[0]._id);
+    var matches = Matches.find({roundid:round[0]._id},{sort:{matchOrder:1}}).fetch();
+    console.log("insertMatchForm canEdit round "+round[0].roundSize);
+    console.log("insertMatchForm canEdit matches length "+matches.length);
+    if(round[0].roundSize > matches.length){
+      return true;
     }
     return false;
   }
 })
 
 Template.drawMeta.helpers({
-  mDraws:function(){
-    var draws = Draws.find({tid:Session.get("tid"),drawGender:"Men"});
-    console.log("mDraws");
-    console.log(draws);
-    return draws
-  },
-  wDraws:function(){
-    var draws = Draws.find({tid:Session.get("tid"),drawGender:"Women"});
-    console.log("wDraws");
-    console.log(draws);
-    return draws
-  }
+	draws: function() {
+	    var draws = Draws.find({tid:Session.get("tid")},{sort: {drawType: -1,drawGender:1}}).fetch();
+	    console.log("drawMeta");
+	    return draws;
+	}
 })
-
 /*
 Template.voters.helpers({
   voters:function(){
@@ -112,9 +121,6 @@ Template.tournamentMeta.helpers({
   canEdit:function(){
     console.log("tournamentMeta - canEdit")
     var tourney = Tournaments.findOne({_id:Session.get("tid")});
-    console.log(tourney.owner==Meteor.userId())
-    console.log(tourney.owner)
-    console.log(Meteor.userId())
 
     if(tourney){
       if(tourney.owner == Meteor.userId()){
@@ -124,39 +130,81 @@ Template.tournamentMeta.helpers({
     return false;
   }
 })
-/*
-Template.editableText.helpers({
-  userCanEdit: function(doc,Collection){
-    doc = Documents.findOne({_id:Session.get("docid"),owner:Meteor.userId()})
-    if(doc){
-      return true;
+
+Template.editTournamentMeta.helpers({
+  tournaments:function(){
+    console.log("newTournamentMeta");
+    return Tournaments.findOne({_id:Session.get("tid")});
+  }
+})
+
+Template.editDrawMeta.helpers({
+	draws: function() {
+	    var draws = Draws.find({tid:Session.get("tid")},{sort: {drawType: -1,drawGender:1}}).fetch();
+	    return draws;
+	}
+})
+
+Template.roundViewer.helpers({
+  rounds:function(){
+    var rounds = Rounds.find({drawid:Session.get("drawid")},{sort:{roundOrder:1}}).fetch();
+    return rounds;
+  }
+})
+
+Template.matchViewer.helpers({
+  roundMatches:function(){
+    var rounds = Rounds.find({drawid:Session.get("drawid")},{sort:{roundOrder:1}}).fetch();
+    var round_ids = rounds.map(function(p) { return p._id });
+
+    var result=[];
+
+    for (i=0;i<rounds.length;i++){
+      var rnd={roundOrder:rounds[i].roundOrder};
+      console.log("roundOrder: "+rnd.roundOrder);
+      rnd.matches = Matches.find({roundid:round_ids[i]},{$sort:{matchOrder:1}}).fetch();
+      console.log("result: "+rnd);
+      result.push(rnd);
     }
-    else{
-      return false;
+    //var matches = Matches.find({roundid:{$in:round_ids}},{$sort:{matchOrder:1}}).fetch();
+
+    console.log("matchViewer round: "+result[0].matches[0].team1Name);
+    if(result.length > 0){
+      return result;
     }
   }
 })
 
-Template.commentList.helpers({
-  comments:function(){
-    return Comments.find({docid:Session.get("docid")});
+Template.matchViewer.events({
+  "click .radio":function(event,template){
+    var match = event.target.dataset.id;
+    var str = match.split("_");
+    console.log(str);
+    var round = Rounds.find({_id:str[0]}).fetch();
+    var nextRound = Rounds.find({drawid:round[0].drawid, roundOrder:round[0].roundOrder+1}).fetch();
+
+    var m;
+    var mo = parseInt(str[2]);
+    if (mo%2 == 1){
+      m = {
+        team1Name:str[3],
+        matchOrder:Math.ceil(mo/2),
+        roundid:nextRound[0]._id
+      };
+    }
+    if (mo%2 == 0){
+      m = {
+        team2Name:str[3],
+        matchOrder:Math.ceil(mo/2),
+        roundid:nextRound[0]._id
+      };
+    }
+
+    console.log(m);
+    Meteor.call("addMatch",m);
   }
 })
 
-
-Template.insertCommentForm.helpers({
-  tid:function(){
-    return Session.get("tid");
-  }
-})
-
-Template.tournamentMeta.events({
-  "click .js-tog-private":function(event){
-    var tourney = {_id:Session.get("tid"),isPrivate:event.target.checked};
-    Meteor.call("updateDocPrivacy",doc);
-  }
-})
-*/
 Template.navbar.events({
   "click .js-load-doc":function(event){
     Session.set("tid",this._id);
@@ -164,14 +212,15 @@ Template.navbar.events({
   "click .js-add-tournament":function(event){
     event.preventDefault();
     console.log(Meteor.user());
-    console.log(Meteor.user().emails[0].adress);
     if(Meteor.user().emails[0].address == "pstanescu@gmail.com"){
       // they are logged in... lets insert a doc
       var id = Meteor.call("addTournament", function(err,res){
         if(!err){
+          console.log("setting session to "+res);
           Session.set("tid",res);
         }
       });
+      Router.go("/tournaments/"+Session.get("tid")+"/edit");
     }
     else{
       alert("Not allowed to create tournament!");
@@ -180,19 +229,24 @@ Template.navbar.events({
 })
 
 Template.drawMeta.events({
-  "click #js-mDraw":function(event){
-    Console.log("DrawID: "+this._id);
-    Session.set("did",this._id);
+  "click .js-draw":function(event,template){
+    Session.set("drawid",this._id);
+    // Remove the class 'active' from potentially current active link.
+    var activeLink = template.find('.active');
+    if(activeLink){
+        activeLink.classList.remove('active');
+    }
 
-    Meteor.call("getRoundsForDraw", function(err,res){
-      if(!err){
-        return res;
-      }
-      return;
-    })
+    // Add the class 'active' to the clicked link.
+    event.currentTarget.classList.add('active');
   }
 })
 
+Template.editDrawMeta.events({
+  "click #js-draw":function(event){
+    Session.set("drawid",this._id);
+  }
+})
 
 function fixObjectKeys(obj){
   var newObj = {};

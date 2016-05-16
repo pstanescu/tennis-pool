@@ -12,12 +12,12 @@
     </div>
     <div class="row">
       <div class="col-md-12">
-        {{> drawRounds}}
+        {{> roundViewer}}
       </div>
     </div>
     <div class="row">
-      <div class="col-md-3 col-xs-6">
-        {{> insertDrawForm}}
+      <div class="col-md-12">
+        {{> matchViewer}}
       </div>
     </div>
     <div class="row">
@@ -38,45 +38,55 @@
 </template>
 
 <template name="drawMeta">
-  <div class="col-md-3 col-xs-6">
-  <h3>Men</h3>
-    <ul class="nav nav-pills">
-      {{#each m_draws}}
-        <li role="presentation" class="active"><a href="#" id="js-m_draw">{{drawType}}</a></li>
-      {{/each}}    
-    </ul>
+  <div class="row">
+    <div class="col-md-6 col-xs-6">
+      <div class="btn-group navbar-inverse" role="group">
+        {{#each draws}}
+          <button type="button" class="btn btn-default navbar-btn js-draw" id="js-draw-{{@index}}"><a href="#">{{drawType}} {{drawGender}}</a></button>
+        {{/each}}
+      </div>
+    </div>
   </div>
-  <div class="col-md-3 col-xs-6">
-  <h3>Women</h3>
-    <ul class="nav nav-pills">    
-      {{#each w_draws}}
-        <li role="presentation" class="active"><a href="#" id="js-w_draw">{{drawType}}</a></li>
-      {{/each}}    
-    </ul>
+  <div class="row">&nbsp;</div>
+</template>
+
+<template name="roundViewer">
+  <div class="row">
+    {{#each rounds}}
+      <div class="col-md-3">
+        <b>{{roundName}}</b>
+      </div>
+    {{/each}}
   </div>
 </template>
 
-<template name="drawRounds">
-  <div class="col-md-3 col-xs-6">
-  <h3>Men</h3>
-    <ul class="nav nav-pills">
-      {{#each m_draws}}
-        <li role="presentation" class="active"><a href="#" id="js-mDraw">{{drawType}}</a></li>
-      {{/each}}    
+<template name="matchViewer">
+  {{#each roundMatches}}
+    <ul class="round round-{{roundOrder}} col-md-2">
+      {{#each matches}}
+        <li class="spacer">&nbsp;</li>
+        <li class="game game-top">
+          <div class="radio">
+            <label><input type="radio" data-id="{{roundid}}_team1Name_{{matchOrder}}_{{team1Name}}" name="blankRadio_{{matchOrder}}" value="team1_{{matchOrder}}" id="team1_{{matchOrder}}">{{team1Name}}</label>
+          </div>
+          <span>{{> editableText type="number" collection="matches" field="team1Set1Score"}}</span>
+          <span>{{> editableText type="number" collection="matches" field="team1Set2Score"}}</span>
+          <span>{{> editableText type="number" collection="matches" field="team1Set3Score"}}</span>
+        </li>
+        <li class="game game-spacer">&nbsp;</li>
+        <li class="game game-bottom">
+          <div class="radio">
+            <label><input type="radio" data-id="{{roundid}}_team2Name_{{matchOrder}}_{{team2Name}}" name="blankRadio_{{matchOrder}}" value="team2_{{matchOrder}}" id="team2_{{matchOrder}}">{{team2Name}}</label>
+          </div>
+          <span>{{> editableText type="number" collection="matches" field="team2Set1Score"}}</span>
+          <span>{{> editableText type="number" collection="matches" field="team2Set2Score"}}</span>
+          <span>{{> editableText type="number" collection="matches" field="team2Set3Score"}}</span>
+        </li>
+        <li class="spacer">&nbsp;</li>
+      {{/each}}
     </ul>
-  </div>
-  <div class="col-md-3 col-xs-6">
-  <h3>Women</h3>
-    <ul class="nav nav-pills">    
-      {{#each w_draws}}
-        <li role="presentation" class="active"><a href="#" id="js-wDraw">{{drawType}}</a></li>
-      {{/each}}    
-    </ul>
-  </div>
+  {{/each}}
 </template>
-
-
-
 
 <template name="commentList">
   {{#each comments}}
@@ -87,27 +97,6 @@
   </ul>
   {{/each}}
 </template>
-
-<!--<template name="insertCommentForm2">
-  {{> quickForm collection="Comments" id="insertCommentForm" type="method" meteormethod="addComment"}}
-</template>-->
-
-
-<template name="insertDrawForm">
-  {{#if canEdit}}
-    {{#autoForm collection="Draws" id="insertDrawForm" type="method" meteormethod="addDraw"}}
-    <fieldset>
-      <legend>Add New Draw</legend>
-      {{> afQuickField name='drawType'}}
-      {{> afQuickField name='drawGender'}}
-      {{> afQuickField name='drawSize'}}
-      {{> afQuickField name='tid' value=tid type="hidden"}}
-    </fieldset>
-    <button type="submit" class="btn btn-primary">Insert</button>
-    {{/autoForm}}
-  {{/if}}
-</template>
-
 
 <template name="insertCommentForm">
   {{#autoForm collection="Comments" id="insertCommentForm" type="method" meteormethod="addComment"}}
@@ -120,8 +109,6 @@
   <button type="submit" class="btn btn-primary">Insert</button>
   {{/autoForm}}
 </template>
-
-
 
 <template name="voters">
   Voters:

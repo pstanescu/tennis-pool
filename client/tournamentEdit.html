@@ -1,0 +1,87 @@
+<template name="tournamentEdit">
+  <div class="container top-margin">
+    <div class="row">
+      <div class="col-md-12">
+        {{> editTournamentMeta}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        {{> editDrawMeta}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-3 col-xs-6">
+        {{> insertDrawForm}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 col-xs-6">
+        {{> insertMatchesForm}}
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="editTournamentMeta">
+ {{#with tournaments}}
+ <span class="h1">
+   {{> editableText collection="tournaments" field="tournamentName"}}
+   {{> editableText collection="tournaments" field="year"}}
+ </span>
+ {{/with}}
+</template>
+
+<template name="editDrawMeta">
+  <div class="row">
+    <div class="col-md-6 col-xs-6">
+      <ul class="nav nav-pills">
+        {{#each draws}}
+          <li role="presentation" id="js-draw"><a href="#">{{drawType}}<span class="badge">{{drawGender}}</span></a></li>
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+</template>
+
+<template name="insertDrawForm">
+  {{#if canEdit}}
+    {{#autoForm collection="Draws" id="insertDrawForm" type="method" meteormethod="addDraw"}}
+    <fieldset>
+      <legend>Add New Draw</legend>
+      {{> afQuickField name='drawType'}}
+      {{> afQuickField name='drawGender'}}
+      {{> afQuickField name='drawSize'}}
+      {{> afQuickField name='tid' value=tid type="hidden"}}
+    </fieldset>
+    <button type="submit" class="btn btn-primary">Insert</button>
+    {{/autoForm}}
+  {{/if}}
+</template>
+
+<template name="insertMatchesForm">
+  {{#if canEdit}}
+    {{#autoForm collection="Matches" id="insertMatchesForm" type="method" meteormethod="addMatch"}}
+    <fieldset>
+      <legend>Add New Match</legend>
+      <div class="row">
+        {{> afQuickField name='team1Name' formgroup-class="col-md-6"}}
+        {{> afQuickField name='team1Set1Score' formgroup-class="col-md-2"}}
+        {{> afQuickField name='team1Set2Score' formgroup-class="col-md-2"}}
+        {{> afQuickField name='team1Set3Score' formgroup-class="col-md-2"}}
+      </div>
+      <div class="row">
+        {{> afQuickField name='team2Name' formgroup-class="col-md-6"}}
+        {{> afQuickField name='team2Set1Score' formgroup-class="col-md-2"}}
+        {{> afQuickField name='team2Set2Score' formgroup-class="col-md-2"}}
+        {{> afQuickField name='team2Set3Score' formgroup-class="col-md-2"}}
+      </div>
+      <div class="row">
+        {{> afQuickField name='matchOrder' formgroup-class="col-md-6"}}
+        {{> afQuickField name='roundid' value=roundid type="hidden"}}
+      </div>
+    </fieldset>
+    <button type="submit" class="btn btn-primary">Insert</button>
+    {{/autoForm}}
+  {{/if}}
+</template>
