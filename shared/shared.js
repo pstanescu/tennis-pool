@@ -75,8 +75,14 @@ Meteor.methods({
               break;
         }
         round = {roundOrder:i, roundName:rndName,roundSize: Math.pow(2,rounds-i+1),drawid:id};
-        console.log(round);
+        console.log("round: "+round);
         var rnd = Rounds.insert(round);
+        console.log(round.roundSize)
+        console.log("rnd: "+rnd);
+        for (var m = 1;m<=round.roundSize/2;m++){
+          Matches.insert({roundid:rnd,matchOrder:m});
+        }
+
         console.log("round: "+rnd);
       }
       return id;
